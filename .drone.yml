@@ -1,0 +1,42 @@
+kind: pipeline
+name: base-images
+type: docker
+
+platform:
+  os: linux
+  arch: amd64
+
+node:
+  type: hosted-amd64
+
+services:
+  - name: docker
+    image: docker:dind
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/
+
+steps:
+  - name: wait for docker service
+    image: docker:dind
+    volumes:
+      - name: dockersock
+        path: /var/run/
+    commands:
+    - while true; do docker info > /dev/null 2>&1 && echo "Docker server up" && break || (echo "Docker server down. Retrying..." && sleep 1); done
+
+  - name: build ansible image
+    image: docker:dind
+    environment:
+      REGISTRY_USER:
+        from_secret: registry_user
+      REGISTRY_PASSWORD:
+        from_secret: registry_password
+    volumes:
+      - name: dockersock
+        path: /var/run/
+    commands:
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD registry.adamkoro.com
+    - docker buildx create --use --name mybuilder
+    - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t registry.adamkoro.com/library/ansible:${DRONE_COMMIT_SHA:0:7} -t registry.adamkoro.com/library/ansibler-ui:latest . --push -f Dockerfile.anisble
