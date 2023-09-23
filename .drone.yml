@@ -10,7 +10,7 @@ node:
   type: hosted-amd64
 
 services:
-  - name: docker
+  - name: docker service
     image: docker:dind
     privileged: true
     volumes:
