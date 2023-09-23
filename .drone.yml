@@ -39,7 +39,7 @@ steps:
     commands:
     - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD registry.adamkoro.com
     - docker buildx create --use --name mybuilder
-    - docker buildx build --platform linux/amd64 -t registry.adamkoro.com/library/ansible:${DRONE_COMMIT_SHA:0:7} -t registry.adamkoro.com/library/ansibler:latest . --push -f Dockerfile.ansible
+    - docker buildx build --platform linux/amd64 -t registry.adamkoro.com/library/ansible:${DRONE_COMMIT_SHA:0:7} -t registry.adamkoro.com/library/ansible:latest . --push -f Dockerfile.ansible
 
 volumes:
   - name: dockersock
